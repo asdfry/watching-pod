@@ -17,7 +17,9 @@ class KubernetesHandler(threading.Thread):
     def run(self):
         # Watching pod start with label selector (app:test)
         w = watch.Watch()
+        target_labels = {"app": "test"}
         logger.info("[K8S] Watching pod start")
+
         # Stream's default timeout_seconds = minRequestTimeout(default=1800) ~ 2*minRequestTimeout
         for event in w.stream(self.v1.list_pod_for_all_namespaces, label_selector="app=test"):
             # Gracefully shutdown
@@ -27,7 +29,6 @@ class KubernetesHandler(threading.Thread):
             # Catch ADDED event
             elif event["type"] == "ADDED":
                 metadata = event["object"].metadata
-                labels = metadata.labels
                 logger.info(f"[K8S] Catch added pod: name={metadata.name}, namespace={metadata.namespace}")
 
                 # Create service using dict
@@ -36,9 +37,9 @@ class KubernetesHandler(threading.Thread):
                 service_dict = {
                     "apiVersion": "v1",
                     "kind": "Service",
-                    "metadata": {"name": name, "lables": labels, "namespace": metadata.namespace},
+                    "metadata": {"name": name, "lables": target_labels, "namespace": metadata.namespace},
                     "spec": {
-                        "selector": labels,
+                        "selector": target_labels,
                         "ports": [{"port": 9000, "targetPort": portname}],
                         "type": "NodePort",
                     },
@@ -47,11 +48,8 @@ class KubernetesHandler(threading.Thread):
                 logger.info(f"[K8S] Add service success: name={name}, namespace={metadata.namespace}, targetport={portname}")
 
                 # Insert DB
-                result = dh.insert_item(name=name, namespace=metadata.namespace, labels=labels)
-                if result == 200:
-                    # Count up numbers
-                    service_num += 1
-                else:
+                result = dh.insert_item(name=name, namespace=metadata.namespace, targetport=portname, labels=target_labels)
+                if not result == 200:
                     logger.warning(f"[K8S] Delete service created just before because insert item failed")
                     self.delete_service(name, metadata.namespace)
 
