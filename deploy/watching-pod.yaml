@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watching-pod
+  labels:
+    app: test
+spec:
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: app
+        image: asdfry/watching-pod:20230613
+        imagePullPolicy: Always
+        env:
+        - name: KUBECONFIG
+          value: "/kube_config"
+        volumeMounts:
+        - mountPath: /kube_config
+          name: kube-config
+        ports:
+        - name: app
+          containerPort: 8000
+      - name: db
+        image: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: MYSQL_DATABASE
+          value: "ten"
+        - name: MYSQL_USER
+          value: "intstr"
+        - name: MYSQL_PASSWORD
+          value: "0604"
+        ports:
+        - name: db
+          containerPort: 3306
+      volumes:
+      - name: kube-config
+        hostPath:
+          path: /home/centos/.kube/config  # directory location on host
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"

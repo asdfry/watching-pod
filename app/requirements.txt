@@ -1,0 +1,6 @@
+fastapi==0.96.0
+PyMySQL==1.0.3
+SQLAlchemy==2.0.15
+uvicorn==0.22.0
+cryptography==39.0.1
+kubernetes==26.1.0

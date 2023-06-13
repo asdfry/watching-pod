@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-3
+  labels:
+    app: test
+spec:
+  containers:
+  - name: echo-hname
+    image: sysnet4admin/echo-hname
+    ports:
+    - name: pod-3
+      containerPort: 80
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"

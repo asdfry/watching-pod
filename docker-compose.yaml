@@ -1,0 +1,24 @@
+version: "3"
+services:
+  app:
+    image: asdfry/watching-pod:20230613
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /home/centos/.kube/config:/kube_config
+    environment:
+      - KUBECONFIG=/kube_config
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=ten
+      - MYSQL_USER=intstr
+      - MYSQL_PASSWORD=0604
+    ports:
+      - "3306:3306"
