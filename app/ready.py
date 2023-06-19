@@ -12,7 +12,7 @@ logger.info("[Ready] Waiting for db container up . . .")
 time.sleep(15)
 
 # Create an engine to connect to the MySQL database (Connection closed every hour)
-engine = create_engine("mysql+pymysql://intstr:0604@db:3306/ten?charset=utf8mb4", pool_recycle=3600)
+engine = create_engine("mysql+pymysql://intstr:0604@localhost:3306/ten?charset=utf8mb4", pool_recycle=3600)
 logger.info("[Ready] Create sqlalchemy engine")
 
 # Create a base class for declarative models
