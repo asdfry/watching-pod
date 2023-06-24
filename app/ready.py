@@ -34,13 +34,13 @@ Base.metadata.create_all(engine)
 logger.info("[Ready] Create pod table")
 
 # Load kubernetes config
-config.load_kube_config()
+cfg = config.load_incluster_config()
 logger.info("[Ready] Load kubernetes config")
 
 # Create kubernetes client
-k8s_client = client.ApiClient()
+k8s_client = client.ApiClient(cfg)
 logger.info("[Ready] Create kubernetes client")
 
 # Create kubernetes v1
-v1 = client.CoreV1Api()
+v1 = client.CoreV1Api(k8s_client)
 logger.info("[Ready] Create kubernetes v1")

@@ -1,6 +1,6 @@
+import time
 import uuid
 import threading
-from kubernetes import watch
 
 from app.ready import v1
 from app.database_handler import dh
@@ -17,23 +17,29 @@ class PodWatcher(threading.Thread):
         """
         Insert db when catching added pod event (target label = {app:test})
         """
-        w = watch.Watch()
         logger.info("[Pod Watcher] Watching pod start")
+        uids = []
 
         # Stream's default timeout_seconds = minRequestTimeout(default=1800) ~ 2*minRequestTimeout
-        for event in w.stream(v1.list_pod_for_all_namespaces, label_selector="app=test"):
+        while True:
             if self.stop_flag:
-                w.stop()
+                break
 
-            # Catch ADDED event
-            elif event["type"] == "ADDED":
-                metadata = event["object"].metadata
-                logger.info(f"[Pod Watcher] Catch added pod: name={metadata.name}, namespace={metadata.namespace}")
+            ret = v1.list_namespaced_pod(namespace="default")
+            for item in ret.items:
+                uid = item.metadata.uid
+                if uid in uids:
+                    continue
+                else:  # Catch ADDED event
+                    logger.info(f"[Pod Watcher] Catch added pod: name={item.metadata.name}, namespace={item.metadata.namespace}")
 
-                # Insert DB
-                name = f"service-{uuid.uuid4()}"
-                portname = event["object"].spec.containers[0].ports[0].name
-                dh.insert_item(name=name, namespace=metadata.namespace, targetport=portname, labels={"app": "test"})
+                    # Insert DB
+                    name = f"service-{uuid.uuid4()}"
+                    portname = item.spec.containers[0].ports[0].name
+                    dh.insert_item(name=name, namespace=item.metadata.namespace, targetport=portname, labels={"app": "test"})
+                    uids.append(uid)
+                    
+            time.sleep(2)
 
         logger.info("[Pod Watcher] Stop kubernetes handler")
 
