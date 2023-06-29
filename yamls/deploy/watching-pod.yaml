@@ -2,22 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: watching-pod
-  labels:
-    app: test
+  namespace: default
 spec:
   selector:
     matchLabels:
-      app: test
+      app: watching-pod
   template:
     metadata:
       labels:
-        app: test
+        app: watching-pod
     spec:
       serviceAccountName: jsh
       automountServiceAccountToken: true
       containers:
       - name: app
-        image: asdfry/watching-pod:20230625
+        image: asdfry/watching-pod:20230629
         imagePullPolicy: Always
         ports:
         - name: app
@@ -36,5 +35,3 @@ spec:
         ports:
         - name: db
           containerPort: 3306
-      tolerations:
-        - key: "node-role.kubernetes.io/control-plane"

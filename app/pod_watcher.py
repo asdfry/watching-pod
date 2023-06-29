@@ -26,11 +26,16 @@ class PodWatcher(threading.Thread):
                 break
 
             ret = v1.list_namespaced_pod(namespace="default")
+
             for item in ret.items:
                 uid = item.metadata.uid
+                labels = item.metadata.labels
+                
                 if uid in uids:
                     continue
-                else:  # Catch ADDED event
+                
+                # Catch ADDED event (target label = {app:test})
+                elif "app" in labels and labels["app"] == "test":
                     logger.info(f"[Pod Watcher] Catch added pod: name={item.metadata.name}, namespace={item.metadata.namespace}")
 
                     # Insert DB

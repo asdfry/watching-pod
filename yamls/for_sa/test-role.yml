@@ -5,5 +5,5 @@ metadata:
   name: test-role
 rules:
 - apiGroups: [""] # "" indicates the core API group
-  resources: ["pods", "services", "nodes"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  resources: ["pods", "services"]
+  verbs: ["get", "list", "watch", "create", "delete"]
